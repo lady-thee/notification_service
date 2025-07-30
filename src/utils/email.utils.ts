@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as fs from 'fs/promises';
@@ -13,6 +13,7 @@ import { EmailInterface } from './interfaces/email.interface';
 
 @Injectable()
 export class EmailUtils {
+  private readonly logger = new Logger('EmailSender');
   constructor(private readonly configService: ConfigService) {}
 
   private async _renderTemplate(
@@ -53,12 +54,19 @@ export class EmailUtils {
       let htmlContent: string | null = null;
       let rawTemplate: string | null = null;
 
+      console.log(body);
+
       try {
         if (emailInterface.template) {
           console.log(`Using template: ${emailInterface.template}`);
+          this.logger.log(`Using template: ${emailInterface.template}`);
+
+          // Load the template from the file system
           const templatePath = path.join(
             __dirname,
             '..',
+            'utils',
+            'templates',
             emailInterface.template,
           );
           console.log(templatePath);
@@ -66,15 +74,24 @@ export class EmailUtils {
         }
       } catch (fileError) {
         console.error('Failed to load template:' + fileError);
+        this.logger.error(
+          `Failed to load template: ${emailInterface.template}`,
+          fileError,
+        );
         throw new Error(
           `Failed to load email template: ${emailInterface.template}`,
         );
       }
 
+      if (!rawTemplate) {
+        console.warn('No template provided, using default HTML content.');
+      }
+      // Render the template with provided data
       htmlContent = await this._renderTemplate(rawTemplate ?? '', {
         name,
         subject,
         body: body ?? '',
+        supportEmail: this.configService.get<string>('BREVO_EMAIL') ?? '',
         year: new Date().getFullYear(),
       });
 
@@ -95,11 +112,15 @@ export class EmailUtils {
         },
       });
       console.log('Email sent successfully:', response.data);
+      this.logger.log(`Email sent successfully to ${to}`);
       return response.data;
     } catch (error) {
       console.error(
         'Failed to send email via Brevo:',
         error.response?.data || error.message,
+      );
+      this.logger.error(
+        `Failed to send email to ${emailInterface.to}: ${error.message}`,
       );
       if (axios.isAxiosError(error) && error.response) {
         throw new Error(

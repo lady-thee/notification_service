@@ -4,9 +4,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
-import { AppService, PrismaService } from './app.service';
+import { AppService } from './app.service';
 import { NotificationService } from './notification/notification.service';
 import { NotificationController } from './notification/notification.controller';
+import { PrismaService } from './prisma/prisma.service';
+import { EmailUtils } from './utils/email.utils';
+// import { PrismaController } from './prisma/prisma.controller';
+// import { PrismaService } from './prisma/prisma.service';
 
 @Module({
   imports: [
@@ -15,7 +19,7 @@ import { NotificationController } from './notification/notification.controller';
     }),
   ],
   controllers: [AppController, NotificationController],
-  providers: [AppService, NotificationService, PrismaService],
+  providers: [AppService, NotificationService, PrismaService, EmailUtils],
   exports: [PrismaService],
 })
 export class AppModule {}

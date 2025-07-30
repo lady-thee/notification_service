@@ -1,0 +1,43 @@
+# Git and version control
+.git
+.gitignore
+.gitattributes
+
+# Node.js dependencies
+node_modules
+
+# Build and test output
+dist
+build
+coverage
+
+# Log files
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and editor configuration
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Docker and VSCode files
+.dockerignore
+Dockerfile
+docker-compose.yml
+.vscode

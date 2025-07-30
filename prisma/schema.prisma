@@ -24,4 +24,6 @@ model Notification {
   content   String?  
   error     String?  
   createdAt DateTime @default(now())
+
+  @@map("notifications")
 }

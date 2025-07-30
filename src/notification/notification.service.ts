@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/app.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailUtils } from 'src/utils/email.utils';
 import { EmailInterface } from 'src/utils/interfaces/email.interface';
 
@@ -15,12 +15,18 @@ export class NotificationService {
   ) {}
 
   async sendWelcomeEmailAndLog(data: { email: string; name: string }) {
+    this.logger.log(
+      `Processing welcome message notification for: ${data.email}`,
+    );
+
+    // Prepare the email details
     const emailDetails: EmailInterface = {
       to: data.email,
       name: data.name,
       subject: 'Welcome to the Order Platform!',
-      body: `Hi ${data.name}, welcome to our platform!`,
-      template: 'templates/welcome.html',
+      body: `Your account has been successfully created. <br>
+          Sign in to your account to start processing your orders.`,
+      template: 'welcome.html',
     };
 
     try {
@@ -53,7 +59,7 @@ export class NotificationService {
           status: 'FAILURE',
           channel: 'EMAIL',
           content: emailDetails.body,
-          error: error.message, // Store the error message
+          error: error.message,
         },
       });
       this.logger.error(`Logged FAILED notification for ${data.email}`);
